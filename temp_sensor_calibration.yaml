@@ -57,13 +57,12 @@ action:
     entity_id:
     - !input external_temperature_sensor
     - !input climate_entity
-    - !input offset_entity_to_update
-    value_template: '{{ (states(offset_entity_to_update)|float + (states(external_temperature_sensor)|float - state_attr(climate_entity, "current_temperature")|float))|round(1)|abs }}'
+    value_template: '{{ (state_attr(climate_entity, "current_temperature")|float - states(external_temperature_sensor)|float)|abs }}'
     above: !input threshold
   then:
   - service: number.set_value
     data:
-      value: '{{ states(offset_entity_to_update) + (states(external_temperature_sensor) - state_attr(climate_entity, "current_temperature"))|round(1) }}'
+      value: '{{ state_attr(climate_entity, "current_temperature")|float - states(external_temperature_sensor)|float + states(offset_entity_to_update)|float }}'
     target:
       entity_id: !input offset_entity_to_update
 trace:
