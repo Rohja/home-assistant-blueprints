@@ -1,0 +1,70 @@
+blueprint:
+  name: "Update Temperature Offset (number entity) using a Climate entity and a External Temperature Sensor"
+  description: This automation will update the temperature offset (number entity) using a Climate entity and a External Temperature Sensor.
+  author: @rohja
+  source: https://github.com/rohja/home-assistant-blueprints/blob/main/temp_sensor_calibration.yaml
+  domain: automation
+  input:
+    climate_entity:
+      name: Thermostat Entity
+      description: The Climate entity that report the mesured room temperature (that need adjustment)
+      selector:
+        entity:
+          domain:
+          - climate
+          multiple: false
+    external_temperature_sensor:
+      name: External Temperature Sensor
+      description: The external temperature sensor that report the real room temperature
+      selector:
+        entity:
+          domain:
+          - sensor
+          device_class: 
+          - temperature
+          multiple: false
+    offset_entity_to_update:
+      name: Offset Entity to Update
+      description: The number entity whose "offset" attribute will be updated
+      selector:
+        entity:
+          domain:
+          - number
+          device_class:
+          - temperature
+          multiple: false
+    threshold:
+      name: Threshold
+      description: The maximum difference between the two sensors to trigger the automation
+      selector:
+        number:
+          min: 0.0
+          max: 10.0
+          step: 0.5
+          unit_of_measurement: °C
+          mode: slider
+variables:
+  climate_entity: !input climate_entity
+  external_temperature_sensor: !input external_temperature_sensor
+  offset_entity_to_update: !input offset_entity_to_update
+  threshold: !input threshold
+trigger:
+- platform: time_pattern
+  minutes: "*"
+action:
+- if:
+  - condition: numeric_state
+    entity_id:
+    - !input external_temperature_sensor
+    - !input climate_entity
+    - !input offset_entity_to_update
+    value_template: '{{ (states(offset_entity_to_update)|float + (states(external_temperature_sensor)|float - state_attr(climate_entity, "current_temperature")|float))|round(1)|abs }}'
+    above: !input threshold
+  then:
+  - service: number.set_value
+    data:
+      value: '{{ states(offset_entity_to_update) + (states(external_temperature_sensor) - state_attr(climate_entity, "current_temperature"))|round(1) }}'
+    target:
+      entity_id: !input offset_entity_to_update
+trace:
+  stored_traces: 120
