@@ -62,7 +62,7 @@ action:
   then:
   - service: number.set_value
     data:
-      value: '{{ state_attr(climate_entity, "current_temperature")|float - states(external_temperature_sensor)|float + states(offset_entity_to_update)|float }}'
+      value: '{{ state_attr(climate_entity, "current_temperature")|float - states(external_temperature_sensor)|float - states(offset_entity_to_update)|float }}'
     target:
       entity_id: !input offset_entity_to_update
 trace:
