@@ -1,7 +1,7 @@
 blueprint:
   name: "Update Temperature Offset (number entity) using a Climate entity and a External Temperature Sensor"
   description: This automation will update the temperature offset (number entity) using a Climate entity and a External Temperature Sensor.
-  author: @rohja
+  author: rohja
   source: https://github.com/rohja/home-assistant-blueprints/blob/main/temp_sensor_calibration.yaml
   domain: automation
   input:
